@@ -1,0 +1,30 @@
+{
+  "name": "cups-game",
+  "version": "1.0.0",
+  "description": "Cups game demo",
+  "main": "index.js",
+  "engines": {
+    "node": "12.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patrickshaughnessy/cups-game.git"
+  },
+  "keywords": [
+    "cups",
+    "game"
+  ],
+  "author": "Patrick Shaughnessy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patrickshaughnessy/cups-game/issues"
+  },
+  "homepage": "https://github.com/patrickshaughnessy/cups-game#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
