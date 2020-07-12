@@ -3,7 +3,7 @@ import {
   HashRouter as Router,
   Route,
   Redirect,
-  useParams
+  useHistory,
 } from "react-router-dom";
 import { v4 } from "uuid";
 
@@ -49,11 +49,11 @@ const LoginForm = () => {
 const Home = () => {
   const { user, userId, onLogout, onLogin } = useAuthDataContext();
   const { getDatabase } = useFirebaseContext();
-
-  const [redirect, setRedirect] = useState(false);
+  const history = useHistory();
 
   const handleLogout = () => {
     onLogout();
+    history.push('/');
   };
 
   const startGame = () => {
@@ -69,12 +69,8 @@ const Home = () => {
       gameActive: false,
       gameFinished: false
     });
-    setRedirect(id);
+    history.push(`/${id}`);
   };
-
-  if (redirect) {
-    return <Redirect to={redirect} />;
-  }
 
   return user ? (
     <div className="loggedInBanner">

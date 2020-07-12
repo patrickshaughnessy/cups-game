@@ -48,7 +48,6 @@ textarea,
 
 .loggedInBanner {
   width: 100vw;
-  position: fixed;
   font-weight: bold;
   background-color: $pink;
   color: $white;
@@ -73,37 +72,6 @@ textarea,
     display: flex;
     justify-content: space-around;
   }
-}
-
-.loggedIn {
-  height: 25vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  font-weight: bold;
-}
-
-.ppImage {
-  padding: 1rem;
-  width: 100%;
-}
-.ppImageLoggedIn {
-  padding: 1rem;
-  height: 30%;
-}
-
-.logoutButton {
-  display: flex;
-  align-items: center;
-}
-
-.submitButton {
-  margin: 0.4rem;
-  font-weight: bold;
-}
-
-.pure-menu-list {
-  float: right;
 }
 
 .center {
