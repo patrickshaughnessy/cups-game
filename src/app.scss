@@ -1,0 +1,111 @@
+$white: #dcdfe1;
+$blue: #0f7cbe;
+$darkBlue: #0a61a8;
+$navy: #1f2a64;
+$pink: #ee3b97;
+$darkPink: #a2217e;
+$gray: #c1b9b0;
+
+/*
+When setting the primary font stack, apply it to the Pure grid units along
+with "html", "button", "input", "select", and "textarea". Pure Grids use
+specific font stacks to ensure the greatest OS/browser compatibility.
+*/
+html,
+button,
+input,
+select,
+textarea,
+.pure-g [class*="pure-u"] {
+  /* Set your content font stack here: */
+  font-family: "Avenir Next W01", Helvetica, Arial, sans-serif;
+}
+
+.loggedOutBanner {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  background-color: $navy;
+  color: $white;
+
+  img {
+    background-color: $pink;
+    padding: 1rem;
+  }
+
+  legend {
+    color: $white;
+  }
+
+  button {
+    background-color: $pink;
+    color: $white;
+  }
+}
+
+.loggedInBanner {
+  width: 100vw;
+  position: fixed;
+  font-weight: bold;
+  background-color: $pink;
+  color: $white;
+
+  .pure-g {
+    padding: 1rem;
+  }
+
+  img {
+    width: 80%;
+    background-color: $pink;
+    padding: 1rem;
+  }
+
+  .textWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .buttonWrapper {
+    display: flex;
+    justify-content: space-around;
+  }
+}
+
+.loggedIn {
+  height: 25vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-weight: bold;
+}
+
+.ppImage {
+  padding: 1rem;
+  width: 100%;
+}
+.ppImageLoggedIn {
+  padding: 1rem;
+  height: 30%;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+}
+
+.submitButton {
+  margin: 0.4rem;
+  font-weight: bold;
+}
+
+.pure-menu-list {
+  float: right;
+}
+
+.center {
+  text-align: center;
+}

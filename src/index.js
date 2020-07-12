@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-import 'purecss';
+import "./app.scss";
 
 ReactDOM.render(
   <React.StrictMode>
