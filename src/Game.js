@@ -7,6 +7,7 @@ import { useFirebaseContext } from "./FirebaseProvider";
 const AdminView = ({ gameActive }) => {
   const { id } = useParams();
   const { getDatabase } = useFirebaseContext();
+  const [initialInfected, setInitialInfected] = useState();
   const handleClick = () => {
     getDatabase(`${id}/participants`)
       .once("value")
@@ -15,31 +16,40 @@ const AdminView = ({ gameActive }) => {
 
         if (participants) {
           const total = Object.keys(participants).length - 1;
-          const indices = Array(3)
+          const indices = Array(1)
             .fill(1)
-            .map(() => Math.floor(Math.random() * total));
+            .map(() => Math.ceil(Math.random() * total));
+
+          const initials = [];
           Object.keys(participants).forEach((p, i) => {
-            if (indices.includes(i)) {
-              const { userId } = participants[p];
+            if (indices.includes(i) && participants[p].role !== 'admin') {
+              const { userId, user } = participants[p];
               getDatabase(`${id}/participants/${userId}/status`).set(
                 "INFECTED"
               );
+              initials.push(user);
             }
           });
 
           getDatabase(`${id}/gameActive`).set(true);
+          setInitialInfected(initials);
         }
       });
   };
   return (
     <>
       <p>Admin view</p>
+      {initialInfected && <p>Initial Infected: {JSON.stringify(initialInfected)}</p>}
       {!gameActive && <button onClick={handleClick}>Begin</button>}
     </>
   );
 };
-const ParticipantView = () => {
-  return <p>Participant view</p>;
+const ParticipantView = ({ partners }) => {
+  return (
+    <>
+      <p>Participant view, partners remaining: {3 - (partners || 0)}</p>
+    </>
+  );
 };
 
 const Participant = ({
@@ -50,7 +60,7 @@ const Participant = ({
   user: participantName,
   userId: participantId,
   gameActive,
-  myData
+  myData = {}
 }) => {
   const { getDatabase } = useFirebaseContext();
   const { id } = useParams();
@@ -61,18 +71,18 @@ const Participant = ({
   const requesting = myData.requesting || {};
   const currentUser = myData.userId;
   const currentUserName = myData.user;
-  console.log('mydata', myData);
+  const currentUserPartners = myData.partners;
+
   const handleConfirm = () => {
-    if (myData.status === "INFECTED" || status === "INFECTED") {
-      getDatabase(`${id}/participants/${participantId}`).update({
-        status: "INFECTED",
-        partners: (partners || 0) + 1
-      });
-      getDatabase(`${id}/participants/${currentUser}`).update({
-        status: "INFECTED",
-        partners: (myData.partners || 0) + 1
-      });
-    }
+    const getsInfected = myData.status === "INFECTED" || status === "INFECTED";
+
+    getDatabase(`${id}/participants/${participantId}`).update({
+      status: getsInfected ? "INFECTED" : "READY"
+    });
+    getDatabase(`${id}/participants/${currentUser}`).update({
+      status: getsInfected ? "INFECTED" : "READY",
+      partners: (myData.partners || 0) + 1
+    });
     getDatabase(`${id}/participants/${participantId}/requesting`).update({
       [currentUser]: false
     });
@@ -82,41 +92,58 @@ const Participant = ({
   };
 
   const handleRequest = () => {
-    console.log('user', currentUser);
-    console.log('requesting', participantId);
     getDatabase(`${id}/participants/${currentUser}/requesting`).update({
       [participantId]: participantName
+    });
+    getDatabase(`${id}/participants/${currentUser}`).update({
+      partners: (myData.partners || 0) + 1
     });
     getDatabase(`${id}/participants/${participantId}/requested`).update({
       [currentUser]: currentUserName
     });
-  }
+  };
+
+  const handleUnRequest = () => {
+    getDatabase(`${id}/participants/${currentUser}/requesting`).update({
+      [participantId]: false
+    });
+    getDatabase(`${id}/participants/${currentUser}`).update({
+      partners: myData.partners - 1
+    });
+    getDatabase(`${id}/participants/${participantId}/requested`).update({
+      [currentUser]: false
+    });
+  };
 
   // Do not show self or admin
-  if (role === 'admin' || currentUser === participantId) {
+  if (role === "admin" || currentUser === participantId) {
     return null;
   }
 
-  const currentUserIsBeingRequested = requested[participantId] && (
+  const currentUserIsBeingRequested = requested[participantId] && currentUserPartners < 3 && (
     <div>
       <p>You are being requested by: {requested[participantId]}</p>
       <button onClick={handleConfirm}>Confirm</button>
     </div>
   );
 
-  const currentUserIsRequestingParticipant = requesting[participantId] && (
+  const currentUserIsRequestingParticipant = requesting[participantId] && currentUserPartners < 3 && (
     <div>
       <p>You have requested this person: {requesting[participantId]}</p>
       <p>Please wait</p>
+      <button onClick={handleUnRequest}>Un-request</button>
     </div>
   );
 
-  const currentUserMayRequest = !requesting[participantId] && !requested[participantId] && (
-    <div>
-      <p>You may requested this person</p>
-      <button onClick={handleRequest}>Request</button>
-    </div>
-  );
+  const currentUserMayRequest = !requesting[participantId] &&
+    !requested[participantId] &&
+    currentUserPartners < 3 &&
+    partners < 3 && (
+      <div>
+        <p>You may requested this person</p>
+        <button onClick={handleRequest}>Request</button>
+      </div>
+    );
 
   return (
     <>
@@ -128,7 +155,7 @@ const Participant = ({
           {currentUserMayRequest}
         </>
       )}
-      {myData.role === 'admin' && (
+      {myData.role === "admin" && (
         <>
           <p>status: {status}</p>
           <p>
@@ -181,11 +208,15 @@ const Game = ({ firebase }) => {
   }, [id, userId, getDatabase, user]);
 
   const myData = participants ? participants[userId] : {};
-  console.log('participants', participants);
+
   return (
     <>
       <div>Game</div>
-      {isAdmin ? <AdminView gameActive={gameActive} /> : <ParticipantView />}
+      {isAdmin ? (
+        <AdminView gameActive={gameActive} />
+      ) : (
+        <ParticipantView {...myData} />
+      )}
       {participants &&
         Object.keys(participants).map(p => (
           <Participant
