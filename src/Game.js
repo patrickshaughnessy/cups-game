@@ -42,40 +42,105 @@ const ParticipantView = () => {
   return <p>Participant view</p>;
 };
 
-const Participant = ({ isAdmin, role, status, partners, user, userId, gameActive, myData }) => {
-  const { userId: authUser } = useAuthDataContext();
+const Participant = ({
+  isAdmin,
+  role,
+  status,
+  partners,
+  user: participantName,
+  userId: participantId,
+  gameActive,
+  myData
+}) => {
   const { getDatabase } = useFirebaseContext();
   const { id } = useParams();
-  console.log("userId", userId);
-  if (role === "admin" || authUser === userId) {
+
+  // Requested means another user has requested me
+  const requested = myData.requested || {};
+  // Requesting means I am requesting another user
+  const requesting = myData.requesting || {};
+  const currentUser = myData.userId;
+  const currentUserName = myData.user;
+  console.log('mydata', myData);
+  const handleConfirm = () => {
+    if (myData.status === "INFECTED" || status === "INFECTED") {
+      getDatabase(`${id}/participants/${participantId}`).update({
+        status: "INFECTED",
+        partners: (partners || 0) + 1
+      });
+      getDatabase(`${id}/participants/${currentUser}`).update({
+        status: "INFECTED",
+        partners: (myData.partners || 0) + 1
+      });
+    }
+    getDatabase(`${id}/participants/${participantId}/requesting`).update({
+      [currentUser]: false
+    });
+    getDatabase(`${id}/participants/${currentUser}/requested`).update({
+      [participantId]: false
+    });
+  };
+
+  const handleRequest = () => {
+    console.log('user', currentUser);
+    console.log('requesting', participantId);
+    getDatabase(`${id}/participants/${currentUser}/requesting`).update({
+      [participantId]: participantName
+    });
+    getDatabase(`${id}/participants/${participantId}/requested`).update({
+      [currentUser]: currentUserName
+    });
+  }
+
+  // Do not show self or admin
+  if (role === 'admin' || currentUser === participantId) {
     return null;
   }
 
-  const handleClick = () => {
-    console.log("click part", user, userId);
-    if (myData.status === 'INFECTED' || status === "INFECTED") {
-      getDatabase(`${id}/participants/${userId}`).update({
-        status: "INFECTED",
-        partners: (partners || 0) + 1,
-      });
-      getDatabase(`${id}/participants/${authUser}`).update({
-        status: "INFECTED",
-        partners: (myData.partners || 0) + 1,
-      });
-    }
-  };
+  const currentUserIsBeingRequested = requested[participantId] && (
+    <div>
+      <p>You are being requested by: {requested[participantId]}</p>
+      <button onClick={handleConfirm}>Confirm</button>
+    </div>
+  );
+
+  const currentUserIsRequestingParticipant = requesting[participantId] && (
+    <div>
+      <p>You have requested this person: {requesting[participantId]}</p>
+      <p>Please wait</p>
+    </div>
+  );
+
+  const currentUserMayRequest = !requesting[participantId] && !requested[participantId] && (
+    <div>
+      <p>You may requested this person</p>
+      <button onClick={handleRequest}>Request</button>
+    </div>
+  );
 
   return (
     <>
-      <div>Participant: {user}</div>
+      <div>Participant: {participantName}</div>
       {!isAdmin && gameActive && (
         <>
-          <button onClick={handleClick}>Do it</button>
+          {currentUserIsBeingRequested}
+          {currentUserIsRequestingParticipant}
+          {currentUserMayRequest}
         </>
       )}
-      {isAdmin && (
+      {myData.role === 'admin' && (
         <>
           <p>status: {status}</p>
+          <p>
+            {JSON.stringify({
+              status,
+              partners,
+              user: participantName,
+              userId: participantId,
+              gameActive,
+              myData
+            })}
+          </p>
         </>
       )}
     </>
@@ -83,7 +148,7 @@ const Participant = ({ isAdmin, role, status, partners, user, userId, gameActive
 };
 
 const Game = ({ firebase }) => {
-  const { user, userId, onLogout, onLogin } = useAuthDataContext();
+  const { user, userId } = useAuthDataContext();
   const { getDatabase } = useFirebaseContext();
   const [isAdmin, setIsAdmin] = useState(false);
   const [gameActive, setGameActive] = useState(false);
@@ -102,6 +167,8 @@ const Game = ({ firebase }) => {
           user,
           userId,
           status: "READY",
+          requesting: {},
+          requested: {},
           partners: 0
         });
       }
@@ -113,8 +180,8 @@ const Game = ({ firebase }) => {
     });
   }, [id, userId, getDatabase, user]);
 
-  const myData = participants && participants[userId] || {};
-
+  const myData = participants ? participants[userId] : {};
+  console.log('participants', participants);
   return (
     <>
       <div>Game</div>
@@ -124,7 +191,6 @@ const Game = ({ firebase }) => {
           <Participant
             key={participants[p].userId}
             {...participants[p]}
-            isAdmin={isAdmin}
             gameActive={gameActive}
             myData={myData}
           />

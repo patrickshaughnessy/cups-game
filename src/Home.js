@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   HashRouter as Router,
-  Link,
+  Route,
   Redirect,
   useParams
 } from "react-router-dom";
@@ -33,11 +33,12 @@ const Home = () => {
       admin: userId,
       participants: {
         [userId]: {
-          userId,
-          role: 'admin'
+          role: 'admin',
+          userId
         }
       },
       gameActive: false,
+      gameFinished: false
     });
     setRedirect(id);
   };
