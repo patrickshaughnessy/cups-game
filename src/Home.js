@@ -91,7 +91,7 @@ const Home = () => {
         </div>
         <div className="pure-u-1 buttonWrapper">
           <button className="pure-button" onClick={startGame}>
-            Start Game
+            Create A New Game
           </button>
           <button className="pure-button" onClick={handleLogout}>
             Logout

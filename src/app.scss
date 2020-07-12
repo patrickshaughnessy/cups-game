@@ -74,6 +74,112 @@ textarea,
   }
 }
 
+.margin {
+  margin: 1rem;
+}
+
+.topView {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: $navy;
+  color: $white;
+
+  .box {
+    margin: 1rem;
+    padding: 1rem;
+    border: 2px solid $blue;
+    background-color: $blue;
+  }
+
+  li {
+    width: fit-content;
+    margin: 1rem 0;
+    span {
+      padding: 0.2rem;
+    }
+  }
+  .blue {
+    background-color: $blue;
+  }
+  .pink {
+    background-color: $pink;
+  }
+  .gray {
+    background-color: $gray;
+    color: $navy;
+  }
+
+  .partnersRemaining {
+    font-size: 150%;
+  }
+}
+
+.participantView {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $navy;
+  color: $white;
+
+  li {
+    width: fit-content;
+    margin: 1rem 0;
+    span {
+      padding: 0.2rem;
+    }
+  }
+  .blue {
+    background-color: $blue;
+  }
+  .pink {
+    background-color: $pink;
+  }
+  .gray {
+    background-color: $gray;
+    color: $navy;
+  }
+}
+
+.participant {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .box {
+    cursor: pointer;
+    display: block;
+    width: 50%;
+    padding: 20px;
+    margin: 5%;
+    border: 1px solid $navy;
+    color: $white;
+    font-weight: bold;
+  }
+
+  .notActive {
+    background-color: $white;
+  }
+  .mayRequest {
+    background-color: $blue;
+  }
+  .isRequesting {
+    background-color: $gray;
+  }
+  .isBeingRequested {
+    background-color: $pink;
+  }
+
+  .positive {
+    background-color: $pink;
+  }
+  .negative {
+    background-color: $blue;
+  }
+
+}
+
 .center {
   text-align: center;
 }
